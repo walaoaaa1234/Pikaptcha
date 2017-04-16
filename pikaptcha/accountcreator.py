@@ -100,21 +100,88 @@ def _validate_username(driver, username):
     except:
         print("Failed to check if the username is available!")
 
+def captcha_verifier():
+    try:
+        chrome_options = Options()
+        chrome_options.add_argument("window-size=600,600")
+        # chrome_options.add_argument("window-position=500,300")
+
+        driver = webdriver.Chrome(chrome_options=chrome_options)
+
+        # driver.get("https://www.google.com/recaptcha/api2/demo")
+        driver.get("https://club.pokemon.com/us/pokemon-trainer-club/parents/sign-up")
+
+        ex_script = '''
+        window._pgm_captcharesponse = "Fail";
+        var captchaPage = '<form action="?" method="POST"><div class="g-recaptcha" data-size="compact" data-sitekey="6LdpuiYTAAAAAL6y9JNUZzJ7cF3F8MQGGKko1bCy" data-callback="_pgm_onCaptchaResponse"></form>';
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = 'https://www.google.com/recaptcha/api.js?hl=en';
+        var script2 = document.createElement('script');
+        script2.type = 'text/javascript';
+        script2.text = 'function _pgm_onCaptchaResponse(str) {window._pgm_captcharesponse = str;}'
+        document.body.parentElement.innerHTML = captchaPage;
+        document.getElementsByTagName('head')[0].appendChild(script);
+        document.getElementsByTagName('head')[0].appendChild(script2);
+        '''
+
+        driver.execute_script(ex_script)
+
+        try:
+            WebDriverWait(driver, 60).until(
+                EC.text_to_be_present_in_element_value((By.ID, 'g-recaptcha-response'), ''))
+            captcha_token = driver.execute_script(
+                'return window._pgm_captcharesponse;')
+            driver.quit()
+        except:
+            try:
+                driver.quit()
+            except:
+                print 'Unable to close ChromeDriver.'
+                log.warning(status['message'])
+
+            print 'ChromeDriver has timed out.'
+            log.warning(status['message'])
+
+            captcha_token = 'Fail'
+
+        return captcha_token
+    except:
+        try:
+            driver.quit()
+        except:
+            print 'Unable to close ChromeDriver.'
+            log.warning(status['message'])
+
+        print 'ChromeDriver was closed, retrying...'
+        log.warning(status['message'])
+
+        captcha_token = captcha_verifier()
+        return captcha_token
 
 def create_account(username, password, email, birthday, captchakey2, captchatimeout):
     if password is not None:
         _validate_password(password)
 
     print("Attempting to create user {user}:{pw}. Opening browser...".format(user=username, pw=password))
-    if captchakey2 != None:
-        dcap = dict(DesiredCapabilities.PHANTOMJS)
-        dcap["phantomjs.page.settings.userAgent"] = user_agent
+    
+    # -----------------------------------------------------------
+    dcap = dict(DesiredCapabilities.PHANTOMJS)
+    dcap["phantomjs.page.settings.userAgent"] = user_agent
+    #driver = webdriver.PhantomJS(desired_capabilities=dcap)
+    driver = PhantomJS(desired_capabilities=dcap)
+    # -----------------------------------------------------------
+    
+    
+    #if captchakey2 != None:
+        #dcap = dict(DesiredCapabilities.PHANTOMJS)
+        #dcap["phantomjs.page.settings.userAgent"] = user_agent
         #driver = webdriver.PhantomJS(desired_capabilities=dcap)
-        driver = PhantomJS(desired_capabilities=dcap)
-    else:
+        #driver = PhantomJS(desired_capabilities=dcap)
+    #else:
         #driver = webdriver.Chrome()
-        driver = Chrome()
-        driver.set_window_size(600, 600)
+        #driver = Chrome()
+        #driver.set_window_size(600, 600)
 
     # Input age: 1992-01-08
     print("Step 1: Verifying age using birthday: {}".format(birthday))
@@ -162,15 +229,24 @@ def create_account(username, password, email, birthday, captchakey2, captchatime
     if captchakey2 == None:
         #Do manual captcha entry
         print("You did not pass a 2captcha key. Please solve the captcha manually.")
-        elem = driver.find_element_by_class_name("g-recaptcha")
-        driver.execute_script("arguments[0].scrollIntoView(true);", elem)
+        # elem = driver.find_element_by_class_name("g-recaptcha")
+        # driver.execute_script("arguments[0].scrollIntoView(true);", elem)
         # Waits 1 minute for you to input captcha
-        try:
-            WebDriverWait(driver, 60).until(EC.text_to_be_present_in_element_value((By.NAME, "g-recaptcha-response"), ""))
-            print("Captcha successful. Sleeping for 1 second...")
-            time.sleep(1)
-        except TimeoutException, err:
-            print("Timed out while manually solving captcha")
+        # try:
+            # WebDriverWait(driver, 60).until(EC.text_to_be_present_in_element_value((By.NAME, "g-recaptcha-response"), ""))
+            # print("Captcha successful. Sleeping for 1 second...")
+            # time.sleep(1)
+        # except TimeoutException, err:
+            # print("Timed out while manually solving captcha")
+            
+        solvedcaptcha = captcha_verifier()
+        captchalen = len(solvedcaptcha)
+        elem = driver.find_element_by_name("g-recaptcha-response")
+        elem = driver.execute_script("arguments[0].style.display = 'block'; return arguments[0];", elem)
+        elem.send_keys(solvedcaptcha)
+        print "Solved captcha"
+        
+        
     else:
         # Now to automatically handle captcha
         print("Starting autosolve recaptcha")
