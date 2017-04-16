@@ -132,6 +132,7 @@ def captcha_verifier():
         '''
 
         driver.execute_script(ex_script)
+        driver.find_element_by_id('recaptcha-anchor').click()
         print '\a'
         
         try:
