@@ -312,6 +312,8 @@ def _validate_response(driver):
             raise PTCInvalidEmailException("Invalid email.")
         else:
             raise PTCInvalidNameException("Username already in use.")
+    elif url == RATE_LIMIT_EXCEEDED:
+        raise PTCRateLimitExceeded("Rate limit exceeded.")
     else:
         raise PTCException("Generic failure. User was not created.")
 

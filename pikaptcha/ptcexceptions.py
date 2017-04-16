@@ -41,3 +41,7 @@ class PTCInvalidBirthdayException(PTCException):
 class PTCTwocaptchaException(PTCException):
     """2captcha unable to provide service"""
     pass
+
+class PTCRateLimitExceeded(PTCException):
+    """Rate limit exceeded"""
+    pass
