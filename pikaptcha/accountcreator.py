@@ -114,7 +114,7 @@ def captcha_verifier():
         driver = Chrome()
         driver.set_window_size(600, 600)
         
-        driver.get("https://club.pokemon.com/us/pokemon-trainer-club/parents/sign-up")
+        # driver.get("https://club.pokemon.com/us/pokemon-trainer-club/parents/sign-up")
         driver.current_url = 'https://club.pokemon.com/us/pokemon-trainer-club/parents/sign-up'
 
         ex_script = '''
@@ -156,10 +156,8 @@ def captcha_verifier():
             driver.quit()
         except:
             print 'Unable to close ChromeDriver.'
-            log.warning(status['message'])
 
         print 'ChromeDriver was closed, retrying...'
-        log.warning(status['message'])
 
         captcha_token = captcha_verifier()
         return captcha_token
