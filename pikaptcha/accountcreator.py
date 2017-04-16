@@ -116,7 +116,6 @@ def captcha_verifier():
 
         # driver.get("https://www.google.com/recaptcha/api2/demo")
         driver.get("https://club.pokemon.com/us/pokemon-trainer-club/parents/sign-up")
-        driver.find_element_by_tag_name("body").send_keys('\ue00c')
 
         ex_script = '''
         window._pgm_captcharesponse = "Fail";
@@ -157,8 +156,10 @@ def captcha_verifier():
             driver.quit()
         except:
             print 'Unable to close ChromeDriver.'
+            log.warning(status['message'])
 
         print 'ChromeDriver was closed, retrying...'
+        log.warning(status['message'])
 
         captcha_token = captcha_verifier()
         return captcha_token
