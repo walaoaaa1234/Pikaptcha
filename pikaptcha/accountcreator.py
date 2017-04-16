@@ -87,6 +87,7 @@ def _validate_password(password):
 
 
 def _validate_username(driver, username):
+    print("Checking user " + username)
     try:
         response = driver.request('POST','https://club.pokemon.com/api/signup/verify-username', data={"name": username})
         response_data = response.json()
