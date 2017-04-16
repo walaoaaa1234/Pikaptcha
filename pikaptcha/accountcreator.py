@@ -29,7 +29,7 @@ SUCCESS_URLS = (
 # As both seem to work, we'll check against both success destinations until I have I better idea for how to check success
 DUPE_EMAIL_URL = 'https://club.pokemon.com/us/pokemon-trainer-club/forgot-password?msg=users.email.exists'
 BAD_DATA_URL = 'https://club.pokemon.com/us/pokemon-trainer-club/parents/sign-up'
-
+RATE_LIMIT_EXCEEDED = 'https://club.pokemon.com/us/pokemon-trainer-club/sign-up/?rate_limit_exceeded=True'
 
 def _random_string(length=15):
     return generate_words(3)
@@ -90,6 +90,7 @@ def _validate_username(driver, username):
     print("Checking user " + username)
     try:
         response = driver.request('POST','https://club.pokemon.com/api/signup/verify-username', data={"name": username})
+        print response
         response_data = response.json()
 
         if response_data['valid'] and not response_data['inuse']:
@@ -103,11 +104,12 @@ def _validate_username(driver, username):
 
 def captcha_verifier():
     try:
-        chrome_options = Options()
-        chrome_options.add_argument("window-size=600,600")
-        # chrome_options.add_argument("window-position=500,300")
+        #chrome_options = Options()
+        #chrome_options.add_argument("window-size=600,600")
 
-        driver = webdriver.Chrome(chrome_options=chrome_options)
+        # driver = webdriver.Chrome(chrome_options=chrome_options)
+        driver = Chrome()
+        driver.set_window_size(600, 600)
 
         # driver.get("https://www.google.com/recaptcha/api2/demo")
         driver.get("https://club.pokemon.com/us/pokemon-trainer-club/parents/sign-up")
@@ -139,10 +141,8 @@ def captcha_verifier():
                 driver.quit()
             except:
                 print 'Unable to close ChromeDriver.'
-                log.warning(status['message'])
 
             print 'ChromeDriver has timed out.'
-            log.warning(status['message'])
 
             captcha_token = 'Fail'
 
