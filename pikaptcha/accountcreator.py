@@ -3,6 +3,7 @@ import string
 import random
 import datetime
 import urllib2
+import requests
 
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
@@ -86,13 +87,15 @@ def _validate_password(password):
     return True
 
 
-def _validate_username(driver, username):
+def _validate_username(username):
     print("Checking user " + username)
     try:
-        response = driver.request('POST','https://club.pokemon.com/api/signup/verify-username', data={"name": username})
-        print response
+        # response = driver.request('POST','https://club.pokemon.com/api/signup/verify-username', data={"name": username})
+        # response_data = response.json()
+        
+        response = requests.post('https://club.pokemon.com/api/signup/verify-username', json={'name': username}, headers={'content-type': 'application/json', 'user-agent': user_agent})
         response_data = response.json()
-
+        
         if response_data['valid'] and not response_data['inuse']:
             print("User '" + username + "' is available, proceeding...")
         else:
@@ -206,7 +209,7 @@ def create_account(username, password, email, birthday, captchakey2, captchatime
     user.clear()
     user.send_keys(username)
 
-    _validate_username(driver, username)
+    _validate_username(username)
 
     elem = driver.find_element_by_name("password")
     elem.clear()
