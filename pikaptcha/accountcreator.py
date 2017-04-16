@@ -130,9 +130,8 @@ def captcha_verifier():
         document.getElementsByTagName('head')[0].appendChild(script);
         document.getElementsByTagName('head')[0].appendChild(script2);
         '''
-        
-        driver.execute_async_script(ex_script)
-        # driver.execute_script(ex_script)
+
+        driver.execute_script(ex_script)
         print '\a'
         
         try:
@@ -157,8 +156,10 @@ def captcha_verifier():
             driver.quit()
         except:
             print 'Unable to close ChromeDriver.'
+            log.warning(status['message'])
 
         print 'ChromeDriver was closed, retrying...'
+        log.warning(status['message'])
 
         captcha_token = captcha_verifier()
         return captcha_token
