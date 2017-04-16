@@ -132,7 +132,8 @@ def captcha_verifier():
         '''
 
         driver.execute_script(ex_script)
-
+        print '\a'
+        
         try:
             WebDriverWait(driver, 60).until(
                 EC.text_to_be_present_in_element_value((By.ID, 'g-recaptcha-response'), ''))
@@ -291,6 +292,10 @@ def create_account(username, password, email, birthday, captchakey2, captchatime
 
     try:
         _validate_response(driver)
+    except PTCRateLimitExceeded:
+        print "Sleep for 10 minutes (RateLimitExceeded)"
+        time.sleep(600)
+        raise
     except:
         print("Failed to create user: {}".format(username))
         driver.close()
