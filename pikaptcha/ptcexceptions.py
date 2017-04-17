@@ -5,7 +5,8 @@ __all__ = [
     'PTCInvalidEmailException',
     'PTCInvalidPasswordException',
     'PTCInvalidBirthdayException',
-    'PTCTwocaptchaException'
+    'PTCTwocaptchaException',
+    'PTCRateLimitExceeded'
 ]
 
 

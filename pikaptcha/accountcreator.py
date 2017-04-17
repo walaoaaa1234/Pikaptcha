@@ -294,6 +294,7 @@ def create_account(username, password, email, birthday, captchakey2, captchatime
         _validate_response(driver)
     except PTCRateLimitExceeded:
         print "Sleep for 10 minutes (RateLimitExceeded)"
+        driver.close()
         time.sleep(600)
         raise
     except:
