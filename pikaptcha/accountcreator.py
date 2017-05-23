@@ -100,64 +100,70 @@ def _validate_username(username):
             print("User '" + username + "' is available, proceeding...")
         else:
             print("User '" + username + "' is already in use.")
-            # driver.close()
+            driver.close()
             raise PTCInvalidNameException("User '" + username + "' is already in use.")
     except:
         print("Failed to check if the username is available!")
 
-def run_chromedriver():
+def captcha_verifier():
     try:
-        if 'chromedriver' not in globals():
-            global chromedriver = Chrome()
-            chromedriver.set_window_size(600, 700)
-        return
+        #chrome_options = Options()
+        #chrome_options.add_argument("window-size=600,600")
+
+        # driver = webdriver.Chrome(chrome_options=chrome_options)
+        driver = Chrome()
+        driver.set_window_size(600, 600)
+
+        # driver.get("https://www.google.com/recaptcha/api2/demo")
+        # driver.get("https://club.pokemon.com/us/pokemon-trainer-club/parents/sign-up")
+        driver.get("https://sso.pokemon.com/sso/oauth2.0/accessToken")
+
+        ex_script = '''
+        window._pgm_captcharesponse = "Fail";
+        var captchaPage = '<form action="?" method="POST"><div class="g-recaptcha" data-size="compact" data-sitekey="6LdpuiYTAAAAAL6y9JNUZzJ7cF3F8MQGGKko1bCy" data-callback="_pgm_onCaptchaResponse"></form>';
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = 'https://www.google.com/recaptcha/api.js?hl=en';
+        var script2 = document.createElement('script');
+        script2.type = 'text/javascript';
+        script2.text = 'function _pgm_onCaptchaResponse(str) {window._pgm_captcharesponse = str;}'
+        document.body.parentElement.innerHTML = captchaPage;
+        document.getElementsByTagName('head')[0].appendChild(script);
+        document.getElementsByTagName('head')[0].appendChild(script2);
+        '''
+
+        driver.execute_script(ex_script)
+        print '\a'
+        
+        try:
+            WebDriverWait(driver, 60).until(
+                EC.text_to_be_present_in_element_value((By.ID, 'g-recaptcha-response'), ''))
+            captcha_token = driver.execute_script(
+                'return window._pgm_captcharesponse;')
+            driver.quit()
+        except:
+            try:
+                driver.quit()
+            except:
+                print 'Unable to close ChromeDriver.'
+
+            print 'ChromeDriver has timed out.'
+
+            captcha_token = 'Fail'
+
+        return captcha_token
     except:
         try:
-            chromedriver.quit()
+            driver.quit()
         except:
             print 'Unable to close ChromeDriver.'
+            log.warning(status['message'])
 
         print 'ChromeDriver was closed, retrying...'
-        run_chromedriver()
-        return
-        
-def captcha_verifier():
-    run_chromedriver()
-    #chrome_options = Options()
-    #chrome_options.add_argument("window-size=600,600")
+        log.warning(status['message'])
 
-    # driver = webdriver.Chrome(chrome_options=chrome_options)
-    # chromedriver = Chrome()
-    # chromedriver.set_window_size(600, 700)
-
-    # driver.get("https://www.google.com/recaptcha/api2/demo")
-    # driver.get("https://club.pokemon.com/us/pokemon-trainer-club/parents/sign-up")
-    chromedriver.get("https://sso.pokemon.com/sso/oauth2.0/accessToken")
-
-    ex_script = '''
-    window._pgm_captcharesponse = "Fail";
-    var captchaPage = '<form action="?" method="POST"><div class="g-recaptcha" data-size="compact" data-sitekey="6LdpuiYTAAAAAL6y9JNUZzJ7cF3F8MQGGKko1bCy" data-callback="_pgm_onCaptchaResponse"></form>';
-    var script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.src = 'https://www.google.com/recaptcha/api.js?hl=en';
-    var script2 = document.createElement('script');
-    script2.type = 'text/javascript';
-    script2.text = 'function _pgm_onCaptchaResponse(str) {window._pgm_captcharesponse = str;}'
-    document.body.parentElement.innerHTML = captchaPage;
-    document.getElementsByTagName('head')[0].appendChild(script);
-    document.getElementsByTagName('head')[0].appendChild(script2);
-    '''
-
-    chromedriver.execute_script(ex_script)
-    print '\a'
-    
-    WebDriverWait(chromedriver, 60).until(
-        EC.text_to_be_present_in_element_value((By.ID, 'g-recaptcha-response'), ''))
-    captcha_token = chromedriver.execute_script(
-        'return window._pgm_captcharesponse;')
-    chromedriver.quit()
-
-    return captcha_token
+        captcha_token = captcha_verifier()
+        return captcha_token
 
 def create_account(username, password, email, birthday, captchakey2, captchatimeout):
     if password is not None:
@@ -168,9 +174,8 @@ def create_account(username, password, email, birthday, captchakey2, captchatime
     # -----------------------------------------------------------
     dcap = dict(DesiredCapabilities.PHANTOMJS)
     dcap["phantomjs.page.settings.userAgent"] = user_agent
-    dcap["phantomjs.page.settings.loadImages"] = "false"
     #driver = webdriver.PhantomJS(desired_capabilities=dcap)
-    driver = PhantomJS(desired_capabilities=dcap)
+    driver = PhantomJS(desired_capabilities=dcap, service_args=['--load-images=no'])
     # -----------------------------------------------------------
     
     
