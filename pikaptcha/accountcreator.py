@@ -108,8 +108,7 @@ def _validate_username(username):
 def run_chromedriver():
     try:
         if 'chromedriver' not in globals():
-            global chromedriver
-            chromedriver = Chrome()
+            global chromedriver = Chrome()
             chromedriver.set_window_size(600, 700)
         return
     except:
@@ -169,7 +168,7 @@ def create_account(username, password, email, birthday, captchakey2, captchatime
     # -----------------------------------------------------------
     dcap = dict(DesiredCapabilities.PHANTOMJS)
     dcap["phantomjs.page.settings.userAgent"] = user_agent
-    dcap["phantomjs.page.settings.loadImages"] = False
+    dcap["phantomjs.page.settings.loadImages"] = "false"
     #driver = webdriver.PhantomJS(desired_capabilities=dcap)
     driver = PhantomJS(desired_capabilities=dcap)
     # -----------------------------------------------------------
