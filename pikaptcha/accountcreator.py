@@ -115,7 +115,8 @@ def captcha_verifier():
         driver.set_window_size(600, 600)
 
         # driver.get("https://www.google.com/recaptcha/api2/demo")
-        driver.get("https://club.pokemon.com/us/pokemon-trainer-club/parents/sign-up")
+        # driver.get("https://club.pokemon.com/us/pokemon-trainer-club/parents/sign-up")
+        driver.get("https://sso.pokemon.com/sso/oauth2.0/accessToken")
 
         ex_script = '''
         window._pgm_captcharesponse = "Fail";
