@@ -174,7 +174,7 @@ def create_account(username, password, email, birthday, captchakey2, captchatime
     dcap = dict(DesiredCapabilities.PHANTOMJS)
     dcap["phantomjs.page.settings.userAgent"] = user_agent
     #driver = webdriver.PhantomJS(desired_capabilities=dcap)
-    driver = PhantomJS(desired_capabilities=dcap)
+    driver = PhantomJS(desired_capabilities=dcap, service_args=['--load-images=no'])
     # -----------------------------------------------------------
     
     
