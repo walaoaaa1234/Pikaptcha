@@ -112,7 +112,7 @@ def captcha_verifier():
 
         # driver = webdriver.Chrome(chrome_options=chrome_options)
         driver = Chrome()
-        driver.set_window_size(600, 600)
+        driver.set_window_size(600, 700)
 
         # driver.get("https://www.google.com/recaptcha/api2/demo")
         # driver.get("https://club.pokemon.com/us/pokemon-trainer-club/parents/sign-up")

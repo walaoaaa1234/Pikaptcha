@@ -26,7 +26,7 @@ setup(
     download_url='{GITHUB_URL}/tarball/{VERSION}'.format(**locals()),
     keywords='',
     install_requires=[
-        'requests[security]==2.10.0',
+        'requests[security]==2.13.0',
         'six==1.10.0',
         'selenium==2.53.6'
     ],
