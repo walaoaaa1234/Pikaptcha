@@ -181,6 +181,8 @@ def entry():
                             ulist.write(" -u " + account_info["username"]+" -p "+account_info["password"]+"")
                         elif args.outputformat == "pkgocsv":
                             ulist.write("ptc,"+account_info["username"]+","+account_info["password"]+"\n")
+                        elif args.outputformat == "mono":
+                            ulist.write(account_info["username"] + "," + account_info["password"] + ",ptc,,,\n")
                         else:
                             ulist.write(account_info["username"]+":"+account_info["password"]+"\n")
                         
