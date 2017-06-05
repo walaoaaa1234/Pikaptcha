@@ -15,7 +15,9 @@ import urllib2
 import imaplib
 import string
 import re
+import time
 
+from seleniumrequests import Chrome
 
 def parse_arguments(args):
     """Parse the command line arguments for the console commands.
@@ -133,6 +135,9 @@ def entry():
             captchabal = openurl("http://2captcha.com/res.php?key=" + args.recaptcha + "&action=getbalance")
         print("Your 2captcha balance is: " + captchabal)
         print("This run will cost you approximately: " + str(float(args.count)*0.003))
+    else:
+        cDriver = Chrome()
+        cDriver.set_window_size(600, 700)
 
     username = args.username    
     
@@ -159,7 +164,7 @@ def entry():
             error_msg = None
             try:
                 try:
-                    account_info = pikaptcha.random_account(username, args.password, args.email, args.birthday, args.plusmail, args.recaptcha, args.captchatimeout)
+                    account_info = pikaptcha.random_account(username, args.password, args.email, args.birthday, args.plusmail, args.recaptcha, args.captchatimeout, cDriver)
                     
                     print('  Username:  {}'.format(account_info["username"]))
                     print('  Password:  {}'.format(account_info["password"]))
@@ -187,6 +192,10 @@ def entry():
                             ulist.write(account_info["username"]+":"+account_info["password"]+"\n")
                         
                         ulist.close()
+                    
+                    # Sleep 2 minutes
+                    time.sleep(120)
+                    
                 # Handle account creation failure exceptions
                 except PTCInvalidPasswordException as err:
                     error_msg = 'Invalid password: {}'.format(err)

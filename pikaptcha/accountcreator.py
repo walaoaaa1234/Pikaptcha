@@ -105,18 +105,18 @@ def _validate_username(username):
     except:
         print("Failed to check if the username is available!")
 
-def captcha_verifier():
+def captcha_verifier(cDriver):
     try:
         #chrome_options = Options()
         #chrome_options.add_argument("window-size=600,600")
 
         # driver = webdriver.Chrome(chrome_options=chrome_options)
-        driver = Chrome()
-        driver.set_window_size(600, 700)
+        # driver = Chrome()
+        # driver.set_window_size(600, 700)
 
         # driver.get("https://www.google.com/recaptcha/api2/demo")
         # driver.get("https://club.pokemon.com/us/pokemon-trainer-club/parents/sign-up")
-        driver.get("https://sso.pokemon.com/sso/oauth2.0/accessToken")
+        cDriver.get("https://sso.pokemon.com/sso/oauth2.0/accessToken")
 
         ex_script = '''
         window._pgm_captcharesponse = "Fail";
@@ -132,40 +132,40 @@ def captcha_verifier():
         document.getElementsByTagName('head')[0].appendChild(script2);
         '''
 
-        driver.execute_script(ex_script)
+        cDriver.execute_script(ex_script)
         print '\a'
         
         try:
-            WebDriverWait(driver, 60).until(
+            WebDriverWait(cDriver, 60).until(
                 EC.text_to_be_present_in_element_value((By.ID, 'g-recaptcha-response'), ''))
-            captcha_token = driver.execute_script(
+            captcha_token = cDriver.execute_script(
                 'return window._pgm_captcharesponse;')
-            driver.quit()
+            # driver.quit()
         except:
-            try:
-                driver.quit()
-            except:
-                print 'Unable to close ChromeDriver.'
+            # try:
+                # driver.quit()
+            # except:
+                # print 'Unable to close ChromeDriver.'
 
-            print 'ChromeDriver has timed out.'
+            # print 'ChromeDriver has timed out.'
 
             captcha_token = 'Fail'
 
         return captcha_token
     except:
-        try:
-            driver.quit()
-        except:
-            print 'Unable to close ChromeDriver.'
-            log.warning(status['message'])
+        # try:
+            # driver.quit()
+        # except:
+            # print 'Unable to close ChromeDriver.'
+            # log.warning(status['message'])
 
-        print 'ChromeDriver was closed, retrying...'
-        log.warning(status['message'])
+        # print 'ChromeDriver was closed, retrying...'
+        # log.warning(status['message'])
 
         captcha_token = captcha_verifier()
         return captcha_token
 
-def create_account(username, password, email, birthday, captchakey2, captchatimeout):
+def create_account(username, password, email, birthday, captchakey2, captchatimeout, cDriver):
     if password is not None:
         _validate_password(password)
 
@@ -174,8 +174,12 @@ def create_account(username, password, email, birthday, captchakey2, captchatime
     # -----------------------------------------------------------
     dcap = dict(DesiredCapabilities.PHANTOMJS)
     dcap["phantomjs.page.settings.userAgent"] = user_agent
-    #driver = webdriver.PhantomJS(desired_capabilities=dcap)
+    # driver = webdriver.PhantomJS(desired_capabilities=dcap)
     driver = PhantomJS(desired_capabilities=dcap, service_args=['--load-images=no'])
+    # chromeOptions = webdriver.ChromeOptions()
+    # prefs = {"profile.managed_default_content_settings.images":2}
+    # chromeOptions.add_experimental_option("prefs",prefs)
+    # driver = Chrome(chrome_options=chromeOptions)
     # -----------------------------------------------------------
     
     
@@ -245,7 +249,7 @@ def create_account(username, password, email, birthday, captchakey2, captchatime
         # except TimeoutException, err:
             # print("Timed out while manually solving captcha")
             
-        solvedcaptcha = captcha_verifier()
+        solvedcaptcha = captcha_verifier(cDriver)
         captchalen = len(solvedcaptcha)
         elem = driver.find_element_by_name("g-recaptcha-response")
         elem = driver.execute_script("arguments[0].style.display = 'block'; return arguments[0];", elem)
@@ -296,7 +300,7 @@ def create_account(username, password, email, birthday, captchakey2, captchatime
     except PTCRateLimitExceeded:
         print "Sleep for 10 minutes (RateLimitExceeded)"
         driver.close()
-        time.sleep(600)
+        # time.sleep(600)
         raise
     except:
         print("Failed to create user: {}".format(username))
@@ -325,7 +329,7 @@ def _validate_response(driver):
         raise PTCException("Generic failure. User was not created.")
 
 
-def random_account(username=None, password=None, email=None, birthday=None, plusmail=None, recaptcha=None, captchatimeout=1000):
+def random_account(username=None, password=None, email=None, birthday=None, plusmail=None, recaptcha=None, captchatimeout=1000, cDriver=None):
     try_username = _random_string() if username is None else str(username)
     password = _random_password() if password is None else str(password)
     try_email = _random_email() if email is None else str(email)
@@ -341,7 +345,7 @@ def random_account(username=None, password=None, email=None, birthday=None, plus
     account_created = False
     while not account_created:
         try:
-            account_created = create_account(try_username, password, try_email, try_birthday, captchakey2, captchatimeout)
+            account_created = create_account(try_username, password, try_email, try_birthday, captchakey2, captchatimeout, cDriver)
         except PTCInvalidNameException:
             if username is None:
                 try_username = _random_string()

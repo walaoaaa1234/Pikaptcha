@@ -7,8 +7,8 @@ from random import randint
 resend = 'Resend your activation email'
 already_done = 'account has already been activated'
 success = 'Thank you for signing up! Your account is now active'
-sleep_min = 15
-sleep_max = 30
+sleep_min = 60
+sleep_max = 90
 
 user_agent = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) " + "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.57 Safari/537.36")
 
@@ -30,12 +30,12 @@ def main():
     
     for url in contents:
         logging.info('Processing next url. Items left in queue: {}'.format(count))
-        response = requests.get(url, headers={'user-agent': user_agent})
+        response = requests.get(url, headers={'user-agent': user_agent}, timeout=20)
         if response.status_code == 200:
             if resend in response.content:
                 logging.info('Expired verification link: {}.'.format(url))
             elif already_done in response.content:
-                logging.info('Account was already activated: {}.'.format(url))
+                logging.info('Account already activated: {}.'.format(url))
             elif success in response.content:
                 logging.info('Account activated: {}.'.format(url))
         elif response.status_code == 503:
